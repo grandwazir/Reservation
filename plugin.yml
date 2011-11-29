@@ -1,0 +1,10 @@
+name: Reservation
+main: name.richardson.james.reservation.ReservationPlugin
+database: true
+version: 1.0.0
+author: James Richardson (grandwazir)
+commands:
+  reserve:
+    description: The root reservations command
+    usage: /reserve <add|remove|list>
+    
