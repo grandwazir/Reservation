@@ -106,11 +106,11 @@ public abstract class Command implements CommandExecutor {
     }
   }    
 
+  protected abstract Map<String, String> parseArguments(List<String> arguments);
+  
   protected void registerPermission(final String name, final String description, final PermissionDefault defaultValue) {
     final Permission permission = new Permission(name, description, defaultValue);
     plugin.getServer().getPluginManager().addPermission(permission);
   }
-  
-  protected abstract Map<String, String> parseArguments(List<String> arguments);
 
 }

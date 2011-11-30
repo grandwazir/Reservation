@@ -46,11 +46,6 @@ public class ListCommand extends Command {
     }
   }
 
-  @Override
-  protected Map<String, String> parseArguments(List<String> arguments) throws IllegalArgumentException {
-    return null;
-  }
-
   private String buildList() {
     StringBuilder list = new StringBuilder();
     for (String playerName : plugin.getReservations().keySet()) {
@@ -59,6 +54,11 @@ public class ListCommand extends Command {
     }
     list.delete(list.length() - 2, list.length());
     return list.toString();
+  }
+
+  @Override
+  protected Map<String, String> parseArguments(List<String> arguments) throws IllegalArgumentException {
+    return null;
   }
   
 }

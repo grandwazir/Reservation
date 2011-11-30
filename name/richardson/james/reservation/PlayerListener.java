@@ -63,6 +63,10 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
     }
   }
   
+  private boolean isServerFull() {
+    return server.getOnlinePlayers().length >= (server.getMaxPlayers() - this.reservedSlots);
+  }
+  
   private boolean kickPlayer() {
     for (Player player : server.getOnlinePlayers()) {
       if (!player.hasPermission("reservation.kick-immune")) {
@@ -71,10 +75,6 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
       }
     }
     return false;
-  }
-  
-  private boolean isServerFull() {
-    return server.getOnlinePlayers().length >= (server.getMaxPlayers() - this.reservedSlots);
   }
   
 }

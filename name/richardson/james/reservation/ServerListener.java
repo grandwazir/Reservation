@@ -21,9 +21,9 @@ import org.bukkit.event.server.ServerListPingEvent;
 
 public class ServerListener extends org.bukkit.event.server.ServerListener {
   
+  private boolean hideReservedSlots;
   private int maxPlayers;
   private int reservedSlots;
-  private boolean hideReservedSlots;
 
   public ServerListener(int maxPlayers, int reservedSlots, boolean hideReservedSlots) {
     this.maxPlayers = maxPlayers;

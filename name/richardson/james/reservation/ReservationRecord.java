@@ -35,17 +35,17 @@ import com.avaje.ebean.validation.NotNull;
 public class ReservationRecord {
   
   public static enum Type {
-    RESERVED,
-    KICK
+    KICK,
+    RESERVED
   }
   
+  private static EbeanServer database;
+
   @Id
   private String playerName;
-
+  
   @NotNull
   private Type reservationType;
-  
-  private static EbeanServer database;
  
   protected static ReservationRecord find(String playerName) {
     // create the example
@@ -57,14 +57,14 @@ public class ReservationRecord {
     return ReservationRecord.database.find(ReservationRecord.class).where().add(expression).findList().get(0);
   }
   
-  protected static List<ReservationRecord> list() {
-    return ReservationRecord.database.find(ReservationRecord.class).findList();
-  }
-
   protected static void initalise(EbeanServer database) {
     if (ReservationRecord.database == null) {
       ReservationRecord.database = database;
     } 
+  }
+
+  protected static List<ReservationRecord> list() {
+    return ReservationRecord.database.find(ReservationRecord.class).findList();
   }
 
   public String getPlayerName() {

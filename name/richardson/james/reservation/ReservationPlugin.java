@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-
 import javax.persistence.PersistenceException;
 
 import name.richardson.james.reservation.util.Logger;
@@ -37,15 +35,41 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ReservationPlugin extends JavaPlugin {
 
-  private PluginManager pluginManager;
-  private PluginDescriptionFile description;
-  private YamlConfiguration configuration;
-  private HashMap<String, ReservationRecord.Type> reservations;
-  private PlayerListener playerListener;
   private CommandManager commandManager;
+  private YamlConfiguration configuration;
+  private PluginDescriptionFile description;
+  private PlayerListener playerListener;
+  private PluginManager pluginManager;
+  private HashMap<String, ReservationRecord.Type> reservations;
   private ServerListener serverListener;
 
+
+  public boolean addReservation(String playerName, String reservationTypeString) {
+    ReservationRecord.Type reservationType = ReservationRecord.Type.valueOf(reservationTypeString); 
+    if (!reservations.containsKey(playerName)) {
+      ReservationRecord record = new ReservationRecord();
+      record.setPlayerName(playerName);
+      record.setReservationType(reservationType);
+      record.save();
+      reservations.put(playerName, reservationType);
+      Logger.debug(String.format("Reservation added for %s. Type: %s", playerName, reservationType.toString()));
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public List<Class<?>> getDatabaseClasses() {
+    final List<Class<?>> list = new ArrayList<Class<?>>();
+    list.add(ReservationRecord.class);
+    return list;
+  }
   
+  public HashMap<String, ReservationRecord.Type> getReservations() {
+    return reservations;
+  }
+
   @Override
   public void onDisable() {
     Logger.info(description.getName() + " is now disabled.");
@@ -82,44 +106,7 @@ public class ReservationPlugin extends JavaPlugin {
     Logger.info(description.getFullName() + " is now enabled.");
     
   }
-  
-  public HashMap<String, ReservationRecord.Type> getReservations() {
-    return reservations;
-  }
 
-  private void isConfigurationSane() {
-    int reservedSlots = configuration.getInt("reserved-slots");
-    if ( (this.getServer().getMaxPlayers() - reservedSlots) < 0) {
-      throw new IllegalArgumentException("Your total player slots must be equal or higher than the number of reserved slots.");
-    }
-  }
-
-  private void registerListeners() {
-    int reservedSlots = configuration.getInt("reserved-slots");
-    PluginManager pm = this.getServer().getPluginManager();
-    this.playerListener = new PlayerListener(reservations, reservedSlots ,this.getServer());
-    this.serverListener = new ServerListener(this.getServer().getMaxPlayers(), reservedSlots, configuration.getBoolean("hide-reserved-slots"));
-    pm.registerEvent(Event.Type.PLAYER_PRELOGIN, this.playerListener, Event.Priority.High, this);
-    pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener, Event.Priority.Normal, this);
-    
-  }
-
-  public boolean addReservation(String playerName, String reservationTypeString) {
-    ReservationRecord.Type reservationType = ReservationRecord.Type.valueOf(reservationTypeString);
-    
-    if (!reservations.containsKey(playerName)) {
-      ReservationRecord record = new ReservationRecord();
-      record.setPlayerName(playerName);
-      record.setReservationType(reservationType);
-      record.save();
-      reservations.put(playerName, reservationType);
-      Logger.debug(String.format("Reservation added for %s. Type: %s", playerName, reservationType.toString()));
-      return true;
-    } else {
-      return false;
-    }
-  }
-  
   public boolean removeReservation(String playerName) {
     if (reservations.containsKey(playerName)) {
       ReservationRecord record = ReservationRecord.find(playerName);
@@ -129,6 +116,13 @@ public class ReservationPlugin extends JavaPlugin {
       return true;
     } else {
       return false;
+    }
+  }
+  
+  private void isConfigurationSane() {
+    int reservedSlots = configuration.getInt("reserved-slots");
+    if ( (this.getServer().getMaxPlayers() - reservedSlots) < 0) {
+      throw new IllegalArgumentException("Your total player slots must be equal or higher than the number of reserved slots.");
     }
   }
   
@@ -153,6 +147,16 @@ public class ReservationPlugin extends JavaPlugin {
     return map;
   }
   
+  private void registerListeners() {
+    int reservedSlots = configuration.getInt("reserved-slots");
+    PluginManager pm = this.getServer().getPluginManager();
+    this.playerListener = new PlayerListener(reservations, reservedSlots ,this.getServer());
+    this.serverListener = new ServerListener(this.getServer().getMaxPlayers(), reservedSlots, configuration.getBoolean("hide-reserved-slots"));
+    pm.registerEvent(Event.Type.PLAYER_PRELOGIN, this.playerListener, Event.Priority.High, this);
+    pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener, Event.Priority.Normal, this);
+    
+  }
+  
   private void setupCommands() {
     this.getCommand("reserve").setExecutor(this.commandManager);
     this.commandManager.registerCommand("add", new AddCommand(this));
@@ -167,13 +171,6 @@ public class ReservationPlugin extends JavaPlugin {
       Logger.warning("No database schema found. Generating a new one.");
       installDDL();
     }
-  }
-  
-  @Override
-  public List<Class<?>> getDatabaseClasses() {
-    final List<Class<?>> list = new ArrayList<Class<?>>();
-    list.add(ReservationRecord.class);
-    return list;
   }
 
 }

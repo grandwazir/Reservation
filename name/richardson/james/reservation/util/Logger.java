@@ -22,9 +22,9 @@ import java.util.logging.Level;
 
 public class Logger {
   
+  static private Level debugLevel = Level.FINE;
   static private java.util.logging.Logger logger;
   static private String prefix = "[Reservation] ";
-  static private Level debugLevel = Level.FINE;
   
   public static void debug(String message) {
     logger.fine(prefix + message);
