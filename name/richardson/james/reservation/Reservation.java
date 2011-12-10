@@ -19,12 +19,16 @@ package name.richardson.james.reservation;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import javax.persistence.PersistenceException;
 
-import name.richardson.james.reservation.util.Logger;
+import name.richardson.james.reservation.util.PluginLogger;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event;
@@ -33,8 +37,9 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
-public class ReservationPlugin extends JavaPlugin {
+public class Reservation extends JavaPlugin {
 
+  private final PluginLogger logger = new PluginLogger(this.toString());
   private CommandManager commandManager;
   private YamlConfiguration configuration;
   private PluginDescriptionFile description;
@@ -42,8 +47,7 @@ public class ReservationPlugin extends JavaPlugin {
   private PluginManager pluginManager;
   private HashMap<String, ReservationRecord.Type> reservations;
   private ServerListener serverListener;
-
-
+  
   public boolean addReservation(String playerName, String reservationTypeString) {
     ReservationRecord.Type reservationType = ReservationRecord.Type.valueOf(reservationTypeString); 
     if (!reservations.containsKey(playerName)) {
@@ -52,7 +56,7 @@ public class ReservationPlugin extends JavaPlugin {
       record.setReservationType(reservationType);
       record.save();
       reservations.put(playerName, reservationType);
-      Logger.debug(String.format("Reservation added for %s. Type: %s", playerName, reservationType.toString()));
+      logger.debug(String.format("Reservation added for %s. Type: %s", playerName, reservationType.toString()));
       return true;
     } else {
       return false;
@@ -72,38 +76,41 @@ public class ReservationPlugin extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    Logger.info(description.getName() + " is now disabled.");
+    logger.info(description.getName() + " is now disabled.");
   }
 
   @Override
   public void onEnable() {
+    PluginLogger.enableDebugging();
     commandManager = new CommandManager();
     pluginManager = this.getServer().getPluginManager();
     description = this.getDescription();
     
     try {
-      Logger.initalise();
       ReservationRecord.initalise(this.getDatabase());
       configuration = loadConfiguration();
-      Logger.setDebugging(configuration.getBoolean("debugging", true));
+      logger.setDebugging(true);
       isConfigurationSane();
       setupDatabase();
       reservations = loadReservations();
       registerListeners();
       setupCommands();
     } catch (IOException exception) {
-      Logger.severe("Unable to load configuration!");
+      logger.severe("Unable to load configuration!");
       this.pluginManager.disablePlugin(this);
     } catch (IllegalArgumentException exception) {
-      Logger.severe(exception.getMessage());
+      logger.severe(exception.getMessage());
       this.pluginManager.disablePlugin(this);
+    } catch (Exception exception) {
+      logger.severe("Unknown exception has occured!");
+      exception.printStackTrace();
     } finally {
       if (!this.pluginManager.isPluginEnabled(this)) {
         return;
       }
     }
 
-    Logger.info(description.getFullName() + " is now enabled.");
+    logger.info(description.getFullName() + " is now enabled.");
     
   }
 
@@ -112,7 +119,7 @@ public class ReservationPlugin extends JavaPlugin {
       ReservationRecord record = ReservationRecord.find(playerName);
       record.destroy();
       reservations.remove(playerName);
-      Logger.debug(String.format("Reservation removed for %s.", playerName));
+      logger.debug(String.format("Reservation removed for %s.", playerName));
       return true;
     } else {
       return false;
@@ -127,12 +134,13 @@ public class ReservationPlugin extends JavaPlugin {
   }
   
   private YamlConfiguration loadConfiguration() throws IOException {
-    Logger.info("Loading configuration: config.yml.");
+    logger.info("Loading configuration: config.yml.");
     File configurationFile = new File(this.getDataFolder() + "/config.yml");
     YamlConfiguration configuration = YamlConfiguration.loadConfiguration(configurationFile);
-    configuration.addDefault("debugging", true);
-    configuration.addDefault("reserved-slots", 4);
-    configuration.addDefault("hide-reserved-slots", true);
+    // load defaults
+    InputStream defaultConfigurationStream = getResource("config.yml");
+    YamlConfiguration defaultConfiguration = YamlConfiguration.loadConfiguration(defaultConfigurationStream);
+    configuration.setDefaults(defaultConfiguration);
     configuration.options().copyDefaults(true);
     configuration.save(configurationFile);
     return configuration;
@@ -143,7 +151,7 @@ public class ReservationPlugin extends JavaPlugin {
     for (ReservationRecord record : ReservationRecord.list()) {
       map.put(record.getPlayerName().toLowerCase(), record.getReservationType());
     }
-    Logger.info(String.format("%d reservation(s) loaded.", map.size()));
+    logger.info(String.format("%d reservation(s) loaded.", map.size()));
     return map;
   }
   
@@ -168,7 +176,7 @@ public class ReservationPlugin extends JavaPlugin {
     try {
       getDatabase().find(ReservationRecord.class).findRowCount();
     } catch (final PersistenceException ex) {
-      Logger.warning("No database schema found. Generating a new one.");
+      logger.warning("No database schema found. Generating a new one.");
       installDDL();
     }
   }

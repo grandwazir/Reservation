@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import name.richardson.james.reservation.util.PluginLogger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -38,12 +40,14 @@ public abstract class Command implements CommandExecutor {
   protected String name;
   protected String[] optionalArgumentKeys;
   protected String permission;
-  protected ReservationPlugin plugin;
+  protected Reservation plugin;
   protected Integer requiredArgumentCount;
   protected String usage;
+  protected PluginLogger logger;
 
-  public Command(ReservationPlugin plugin) {
+  public Command(Reservation plugin) {
     this.plugin = plugin;
+    this.logger = new PluginLogger(this.toString());
   }
   
   public abstract void execute(CommandSender sender, Map<String, String> arguments);

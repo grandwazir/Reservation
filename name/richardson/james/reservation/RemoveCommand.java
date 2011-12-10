@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import name.richardson.james.reservation.util.Logger;
+import name.richardson.james.reservation.util.PluginLogger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -29,7 +29,7 @@ import org.bukkit.permissions.PermissionDefault;
 
 public class RemoveCommand extends Command {
 
-  public RemoveCommand(final ReservationPlugin plugin) {
+  public RemoveCommand(final Reservation plugin) {
     super(plugin);
     this.name = "remove";
     this.description = "remove a player from the reservation list";
@@ -43,7 +43,7 @@ public class RemoveCommand extends Command {
     String playerName = arguments.get("playerName"); 
     if (plugin.removeReservation(playerName)) {
       sender.sendMessage(String.format(ChatColor.GREEN + "%s has been removed from the reserved list.", playerName));
-      Logger.info(String.format("%s removed %s from the reserved list.", this.getSenderName(sender), playerName));
+      // Logger.info(String.format("%s removed %s from the reserved list.", this.getSenderName(sender), playerName));
     } else {
       sender.sendMessage(String.format(ChatColor.YELLOW + "%s is not on the reserved list.", playerName));
     }

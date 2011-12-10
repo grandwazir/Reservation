@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import name.richardson.james.reservation.ReservationRecord;
-import name.richardson.james.reservation.util.Logger;
+import name.richardson.james.reservation.util.PluginLogger;
 
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -42,7 +42,7 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
   
   public void onPlayerPreLogin(PlayerPreLoginEvent event) {
     if (isServerFull()) {
-      Logger.debug(String.format("%s is attempting to join the server.", event.getName()));
+      // Logger.debug(String.format("%s is attempting to join the server.", event.getName()));
       String playerName = event.getName().toLowerCase();
       if (reservations.containsKey(playerName)) {
         switch (reservations.get(playerName)) {

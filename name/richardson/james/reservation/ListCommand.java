@@ -26,7 +26,7 @@ import org.bukkit.permissions.PermissionDefault;
 
 public class ListCommand extends Command {
 
-  public ListCommand(final ReservationPlugin plugin) {
+  public ListCommand(final Reservation plugin) {
     super(plugin);
     this.name = "list";
     this.description = "list all players that have reservations";

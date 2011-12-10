@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import name.richardson.james.reservation.util.Logger;
+import name.richardson.james.reservation.util.PluginLogger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -29,8 +29,9 @@ import org.bukkit.permissions.PermissionDefault;
 
 public class AddCommand extends Command {
 
-  public AddCommand(final ReservationPlugin plugin) {
+  public AddCommand(final Reservation plugin) {
     super(plugin);
+    this.logger.setDebugging(true);
     this.name = "add";
     this.description = "add a player to the reservation list";
     this.usage = "/reserve add [name] [type]";
@@ -43,7 +44,7 @@ public class AddCommand extends Command {
     String playerName = arguments.get("playerName"); 
     if (plugin.addReservation(playerName, arguments.get("reservationType"))) {
       sender.sendMessage(String.format(ChatColor.GREEN + "%s added to reserved list.", playerName));
-      Logger.info(String.format("%s added %s to reserved list.", this.getSenderName(sender), playerName));
+      logger.debug(String.format("%s added %s to reserved list.", this.getSenderName(sender), playerName));
     } else {
       sender.sendMessage(String.format(ChatColor.YELLOW + "%s is already on the reserved list.", playerName));
     }
