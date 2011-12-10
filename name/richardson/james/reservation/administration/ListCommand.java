@@ -15,10 +15,13 @@
  * You should have received a copy of the GNU General Public License 
  * along with Reservation.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package name.richardson.james.reservation;
+package name.richardson.james.reservation.administration;
 
 import java.util.List;
 import java.util.Map;
+
+import name.richardson.james.reservation.Reservation;
+import name.richardson.james.reservation.util.Command;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

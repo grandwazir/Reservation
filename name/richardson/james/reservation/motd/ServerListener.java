@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License 
  * along with Reservation.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package name.richardson.james.reservation;
+package name.richardson.james.reservation.motd;
 
 import org.bukkit.event.server.ServerListPingEvent;
 
