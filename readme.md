@@ -20,7 +20,7 @@ Reservation will also warn you if you attempt to use it with an untested build o
 
 ### Getting Reservation
 
-The best way to install DynamicMOTD is to use the direct download link to the latest version:
+The best way to install Reservation is to use the direct download link to the latest version:
 
     http://downloads.james.richardson.name/public/binaries/reservation/Reservation.jar
     
