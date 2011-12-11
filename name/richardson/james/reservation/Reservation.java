@@ -19,26 +19,20 @@
 
 package name.richardson.james.reservation;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import javax.persistence.PersistenceException;
 
 import name.richardson.james.reservation.administration.AddCommand;
 import name.richardson.james.reservation.administration.ListCommand;
 import name.richardson.james.reservation.administration.RemoveCommand;
-import name.richardson.james.reservation.database.ReservationRecord;
 import name.richardson.james.reservation.motd.ServerListener;
-import name.richardson.james.reservation.util.CommandManager;
-import name.richardson.james.reservation.util.PluginLogger;
+import name.richardson.james.reservation.util.Configuration;
+import name.richardson.james.reservation.util.Database;
+import name.richardson.james.reservation.util.Logger;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -46,134 +40,76 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Reservation extends JavaPlugin {
 
-  private final PluginLogger logger = new PluginLogger(this.toString());
+  private final Logger logger = new Logger(this.getClass());
   private CommandManager commandManager;
-  private YamlConfiguration configuration;
+  private Configuration configuration;
   private PluginDescriptionFile description;
   private PlayerListener playerListener;
   private PluginManager pluginManager;
-  private HashMap<String, ReservationRecord.Type> reservations;
   private ServerListener serverListener;
-
-  public boolean addReservation(String playerName, String reservationTypeString) {
-    ReservationRecord.Type reservationType = ReservationRecord.Type
-        .valueOf(reservationTypeString);
-    if (!reservations.containsKey(playerName)) {
-      ReservationRecord record = new ReservationRecord();
-      record.setPlayerName(playerName);
-      record.setReservationType(reservationType);
-      record.save();
-      reservations.put(playerName, reservationType);
-      logger.debug(String.format("Reservation added for %s. Type: %s",
-          playerName, reservationType.toString()));
-      return true;
-    } else {
-      return false;
-    }
-  }
 
   @Override
   public List<Class<?>> getDatabaseClasses() {
-    final List<Class<?>> list = new ArrayList<Class<?>>();
-    list.add(ReservationRecord.class);
-    return list;
-  }
-
-  public HashMap<String, ReservationRecord.Type> getReservations() {
-    return reservations;
+    return Database.getDatabaseClasses();
   }
 
   @Override
   public void onDisable() {
-    logger.info(description.getName() + " is now disabled.");
+    this.logger.info(this.description.getName() + " is now disabled.");
   }
 
   @Override
   public void onEnable() {
-    PluginLogger.enableDebugging();
-    commandManager = new CommandManager();
-    pluginManager = this.getServer().getPluginManager();
-    description = this.getDescription();
+    this.commandManager = new CommandManager();
+    this.pluginManager = this.getServer().getPluginManager();
+    this.description = this.getDescription();
 
     try {
-      ReservationRecord.initalise(this.getDatabase());
-      configuration = loadConfiguration();
-      logger.setDebugging(true);
-      isConfigurationSane();
-      setupDatabase();
-      reservations = loadReservations();
-      registerListeners();
-      setupCommands();
-    } catch (IOException exception) {
-      logger.severe("Unable to load configuration!");
+      this.configuration = this.loadConfiguration();
+      this.isConfigurationSane();
+      this.setupDatabase();
+      new Database(this);
+      this.registerListeners();
+      this.setupCommands();
+    } catch (final IOException exception) {
+      this.logger.severe("Unable to load configuration!");
       this.pluginManager.disablePlugin(this);
-    } catch (IllegalArgumentException exception) {
-      logger.severe(exception.getMessage());
+    } catch (final IllegalArgumentException exception) {
+      this.logger.severe(exception.getMessage());
       this.pluginManager.disablePlugin(this);
-    } catch (Exception exception) {
-      logger.severe("Unknown exception has occured!");
+    } catch (final Exception exception) {
+      this.logger.severe("Unknown exception has occured!");
       exception.printStackTrace();
     } finally {
-      if (!this.pluginManager.isPluginEnabled(this)) { return; }
+      if (!this.pluginManager.isPluginEnabled(this)) return;
     }
 
-    logger.info(description.getFullName() + " is now enabled.");
+    this.logger.info(this.description.getFullName() + " is now enabled.");
 
-  }
-
-  public boolean removeReservation(String playerName) {
-    if (reservations.containsKey(playerName)) {
-      ReservationRecord record = ReservationRecord.find(playerName);
-      record.destroy();
-      reservations.remove(playerName);
-      logger.debug(String.format("Reservation removed for %s.", playerName));
-      return true;
-    } else {
-      return false;
-    }
   }
 
   private void isConfigurationSane() {
-    int reservedSlots = configuration.getInt("reserved-slots");
-    if ((this.getServer().getMaxPlayers() - reservedSlots) < 0) { throw new IllegalArgumentException(
-        "Your total player slots must be equal or higher than the number of reserved slots."); }
+    final int reservedSlots = this.configuration.getReservedSlots();
+    if ((this.getServer().getMaxPlayers() - reservedSlots) < 0) throw new IllegalArgumentException("Your total player slots must be equal or higher than the number of reserved slots.");
   }
 
-  private YamlConfiguration loadConfiguration() throws IOException {
-    logger.info("Loading configuration: config.yml.");
-    File configurationFile = new File(this.getDataFolder() + "/config.yml");
-    YamlConfiguration configuration = YamlConfiguration
-        .loadConfiguration(configurationFile);
-    // load defaults
-    InputStream defaultConfigurationStream = getResource("config.yml");
-    YamlConfiguration defaultConfiguration = YamlConfiguration
-        .loadConfiguration(defaultConfigurationStream);
-    configuration.setDefaults(defaultConfiguration);
-    configuration.options().copyDefaults(true);
-    configuration.save(configurationFile);
+  private Configuration loadConfiguration() throws IOException {
+    final InputStream defaultConfigurationStream = this.getResource("config.yml");
+    final Configuration configuration = new Configuration(this.getDataFolder(), defaultConfigurationStream);
+    // enable debugging if necessary
+    if (configuration.isDebugging()) {
+      Logger.enableDebugging();
+      configuration.logValues();
+    }
     return configuration;
   }
 
-  private HashMap<String, ReservationRecord.Type> loadReservations() {
-    HashMap<String, ReservationRecord.Type> map = new HashMap<String, ReservationRecord.Type>();
-    for (ReservationRecord record : ReservationRecord.list()) {
-      map.put(record.getPlayerName().toLowerCase(), record.getReservationType());
-    }
-    logger.info(String.format("%d reservation(s) loaded.", map.size()));
-    return map;
-  }
-
   private void registerListeners() {
-    int reservedSlots = configuration.getInt("reserved-slots");
-    PluginManager pm = this.getServer().getPluginManager();
-    this.playerListener = new PlayerListener(reservations, reservedSlots,
-        this.getServer());
-    this.serverListener = new ServerListener(this.getServer().getMaxPlayers(),
-        reservedSlots, configuration.getBoolean("hide-reserved-slots"));
-    pm.registerEvent(Event.Type.PLAYER_PRELOGIN, this.playerListener,
-        Event.Priority.High, this);
-    pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener,
-        Event.Priority.Normal, this);
+    final PluginManager pm = this.getServer().getPluginManager();
+    this.playerListener = new PlayerListener(this.getServer());
+    this.serverListener = new ServerListener(this.getServer());
+    pm.registerEvent(Event.Type.PLAYER_PRELOGIN, this.playerListener, Event.Priority.High, this);
+    pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener, Event.Priority.Normal, this);
 
   }
 
@@ -186,10 +122,10 @@ public class Reservation extends JavaPlugin {
 
   private void setupDatabase() {
     try {
-      getDatabase().find(ReservationRecord.class).findRowCount();
+      this.getDatabase().find(ReservationRecord.class).findRowCount();
     } catch (final PersistenceException ex) {
-      logger.warning("No database schema found. Generating a new one.");
-      installDDL();
+      this.logger.warning("No database schema found. Generating a new one.");
+      this.installDDL();
     }
   }
 

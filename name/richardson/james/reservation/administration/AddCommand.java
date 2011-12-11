@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.database.ReservationRecord;
-import name.richardson.james.reservation.database.ReservationRecord.Type;
+import name.richardson.james.reservation.ReservationRecord;
+import name.richardson.james.reservation.ReservationRecord.Type;
 import name.richardson.james.reservation.util.Command;
-import name.richardson.james.reservation.util.PluginLogger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.PermissionDefault;
 
@@ -37,43 +37,37 @@ public class AddCommand extends Command {
 
   public AddCommand(final Reservation plugin) {
     super(plugin);
-    this.logger.setDebugging(true);
     this.name = "add";
     this.description = "add a player to the reservation list";
     this.usage = "/reserve add [name] [type]";
     this.permission = "reservation." + this.name;
-    registerPermission(permission, "add people to the reservation list",
-        PermissionDefault.OP);
+    this.registerPermission(this.permission, "add people to the reservation list", PermissionDefault.OP);
   }
 
   @Override
-  public void execute(final CommandSender sender, Map<String, String> arguments) {
-    String playerName = arguments.get("playerName");
-    if (plugin.addReservation(playerName, arguments.get("reservationType"))) {
-      sender.sendMessage(String.format(ChatColor.GREEN
-          + "%s added to reserved list.", playerName));
-      logger.debug(String.format("%s added %s to reserved list.",
-          this.getSenderName(sender), playerName));
+  public void execute(final CommandSender sender, final Map<String, Object> arguments) {
+    final OfflinePlayer player = (OfflinePlayer) arguments.get("player");
+    final Type reservationType = (Type) arguments.get("reservationType");
+    
+    if (this.handler.addReservation(player, reservationType)) {
+      sender.sendMessage(String.format(ChatColor.GREEN + "%s added to reserved list.", player.getName()));
+      this.logger.info(String.format("%s added %s to reserved list.", sender.getName(), player.getName()));
     } else {
-      sender.sendMessage(String.format(ChatColor.YELLOW
-          + "%s is already on the reserved list.", playerName));
+      sender.sendMessage(String.format(ChatColor.YELLOW + "%s is already on the reserved list.", player.getName()));
     }
   }
 
   @Override
-  protected Map<String, String> parseArguments(List<String> arguments)
-      throws IllegalArgumentException {
-    Map<String, String> m = new HashMap<String, String>();
+  protected Map<String, Object> parseArguments(final List<String> arguments) throws IllegalArgumentException {
+    final Map<String, Object> m = new HashMap<String, Object>();
     arguments.remove(0);
 
     try {
-      m.put("playerName", arguments.get(0));
-      ReservationRecord.Type.valueOf(arguments.get(1));
-      m.put("reservationType", arguments.get(1));
-    } catch (IndexOutOfBoundsException exception) {
-      throw new IllegalArgumentException(
-          "You must specify both a name and a reservation type.");
-    } catch (IllegalArgumentException exception) {
+      m.put("player", this.plugin.getServer().getOfflinePlayer(arguments.get(0)));
+      m.put("reservationType", ReservationRecord.Type.valueOf(arguments.get(1)));
+    } catch (final IndexOutOfBoundsException exception) {
+      throw new IllegalArgumentException("You must specify both a name and a reservation type.");
+    } catch (final IllegalArgumentException exception) {
       throw new IllegalArgumentException("Use RESERVED or KICK as the type.");
     }
 

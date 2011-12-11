@@ -21,8 +21,11 @@ package name.richardson.james.reservation.administration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import name.richardson.james.reservation.Reservation;
+import name.richardson.james.reservation.ReservationRecord;
+import name.richardson.james.reservation.ReservationRecord.Type;
 import name.richardson.james.reservation.util.Command;
 
 import org.bukkit.ChatColor;
@@ -37,28 +40,28 @@ public class ListCommand extends Command {
     this.description = "list all players that have reservations";
     this.usage = "/reserve list";
     this.permission = "reservation." + this.name;
-    registerPermission(permission, "list players on the reservation list",
-        PermissionDefault.OP);
+    this.registerPermission(this.permission, "list players on the reservation list", PermissionDefault.OP);
   }
 
   @Override
-  public void execute(final CommandSender sender, Map<String, String> arguments) {
-    if (plugin.getReservations().size() == 0) {
-      sender
-          .sendMessage(ChatColor.YELLOW + "There are no players on the list.");
+  public void execute(final CommandSender sender, final Map<String, Object> arguments) {
+    Map<String, Type> reservations = this.handler.listReservations();
+    if (reservations.size() == 0) {
+      sender.sendMessage(ChatColor.YELLOW + "There are no players on the list.");
     } else {
-      String list = buildList();
-      String numberOfPlayers = Integer
-          .toString(plugin.getReservations().size());
-      sender.sendMessage(ChatColor.YELLOW + numberOfPlayers + " player(s): "
-          + ChatColor.GRAY + list);
+      final String list = this.buildList(reservations);
+      final String numberOfPlayers = Integer.toString(reservations.size());
+      sender.sendMessage(ChatColor.YELLOW + numberOfPlayers + " player(s): " + ChatColor.WHITE + list);
     }
   }
 
-  private String buildList() {
-    StringBuilder list = new StringBuilder();
-    for (String playerName : plugin.getReservations().keySet()) {
-      list.append(playerName);
+  private String buildList(final Map<String, Type> reservations) {
+    final StringBuilder list = new StringBuilder();
+    for (Entry<String, ReservationRecord.Type> entry : reservations.entrySet()) {
+      list.append(entry.getKey());
+      list.append(" (");
+      list.append(entry.getValue());
+      list.append(")");
       list.append(", ");
     }
     list.delete(list.length() - 2, list.length());
@@ -66,8 +69,7 @@ public class ListCommand extends Command {
   }
 
   @Override
-  protected Map<String, String> parseArguments(List<String> arguments)
-      throws IllegalArgumentException {
+  protected Map<String, Object> parseArguments(final List<String> arguments) throws IllegalArgumentException {
     return null;
   }
 

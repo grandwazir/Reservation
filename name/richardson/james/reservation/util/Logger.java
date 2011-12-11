@@ -23,15 +23,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class PluginLogger {
+public class Logger {
 
   private static boolean currentlyDebugging = false;
   private static final Level debugLevel = Level.ALL;
-  private static final Logger parentLogger = Logger.getLogger("Minecraft");
+  private static final java.util.logging.Logger parentLogger = java.util.logging.Logger.getLogger("Minecraft");
   private static final String prefix = "[Reservation] ";
-  private static final Set<PluginLogger> registeredLoggers = new HashSet<PluginLogger>();
+  private static final Set<Logger> registeredLoggers = new HashSet<Logger>();
 
   private final java.util.logging.Logger logger;
 
@@ -41,11 +40,11 @@ public class PluginLogger {
    * @param className
    * The name of the logger, should be the class it belongs to.
    */
-  public PluginLogger(final String className) {
-    this.logger = java.util.logging.Logger.getLogger(className);
-    this.logger.setParent(PluginLogger.parentLogger);
-    PluginLogger.registeredLoggers.add(this);
-    if (PluginLogger.currentlyDebugging) {
+  public Logger(final Class<?> parentClass) {
+    this.logger = java.util.logging.Logger.getLogger(parentClass.getName());
+    this.logger.setParent(Logger.parentLogger);
+    Logger.registeredLoggers.add(this);
+    if (Logger.currentlyDebugging) {
       this.setDebugging(true);
     }
   }
@@ -58,13 +57,14 @@ public class PluginLogger {
    * will also have debugging enabled.
    */
   public static void enableDebugging() {
-    PluginLogger.currentlyDebugging = true;
-    for (final Handler handler : PluginLogger.parentLogger.getHandlers()) {
-      handler.setLevel(PluginLogger.debugLevel);
+    Logger.currentlyDebugging = true;
+    for (final Handler handler : Logger.parentLogger.getHandlers()) {
+      handler.setLevel(Logger.debugLevel);
     }
-    for (final PluginLogger logger : PluginLogger.registeredLoggers) {
+    for (final Logger logger : Logger.registeredLoggers) {
       logger.setDebugging(true);
     }
+    parentLogger.fine(prefix + "Debugging is now enabled.");
   }
 
   /**
@@ -74,10 +74,19 @@ public class PluginLogger {
    * The string that you wish to log.
    */
   public void debug(final String message) {
-    this.logger.fine(PluginLogger.prefix + this.logger.getName() + ": "
-        + message);
+    this.logger.fine(Logger.prefix + "<" + this.logger.getName() + "> " + message);
   }
 
+  /**
+   * Log a configuration message with this logger.
+   * 
+   * @param message
+   * The string that you wish to log.
+   */
+  public void config(final String message) {
+    this.logger.config(Logger.prefix + "<" + this.logger.getName() + "> " + message);
+  }
+  
   /**
    * Log a general message with this logger.
    * 
@@ -85,7 +94,7 @@ public class PluginLogger {
    * The string that you wish to log.
    */
   public void info(final String message) {
-    this.logger.info(PluginLogger.prefix + message);
+    this.logger.info(Logger.prefix + message);
   }
 
   /**
@@ -94,7 +103,7 @@ public class PluginLogger {
    * @return isDebugging true if it is logging debug messages, false otherwise.
    */
   public boolean isDebugging() {
-    return this.logger.isLoggable(PluginLogger.debugLevel);
+    return this.logger.isLoggable(Logger.debugLevel);
   }
 
   /**
@@ -104,7 +113,7 @@ public class PluginLogger {
    * true if it is should log messages, false otherwise.
    */
   public void setDebugging(final Boolean value) {
-    this.logger.setLevel(PluginLogger.debugLevel);
+    this.logger.setLevel(Logger.debugLevel);
   }
 
   /**
@@ -114,7 +123,7 @@ public class PluginLogger {
    * The string that you wish to log.
    */
   public void severe(final String message) {
-    this.logger.severe(PluginLogger.prefix + message);
+    this.logger.severe(Logger.prefix + message);
   }
 
   /**
@@ -124,7 +133,7 @@ public class PluginLogger {
    * The string that you wish to log.
    */
   public void warning(final String message) {
-    this.logger.warning(PluginLogger.prefix + message);
+    this.logger.warning(Logger.prefix + message);
   }
 
 }

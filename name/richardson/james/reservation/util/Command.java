@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import name.richardson.james.reservation.Reservation;
+import name.richardson.james.reservation.ReservationHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -36,40 +37,35 @@ import org.bukkit.permissions.PermissionDefault;
 
 public abstract class Command implements CommandExecutor {
 
-  protected static String consoleName = "Console";
-
+  protected final static String consoleName = "Console";
   protected String description;
   protected String name;
-  protected String[] optionalArgumentKeys;
   protected String permission;
-  protected Reservation plugin;
-  protected Integer requiredArgumentCount;
+  protected final Reservation plugin;
+  protected final Logger logger;
+  protected final ReservationHandler handler;
   protected String usage;
-  protected PluginLogger logger;
 
-  public Command(Reservation plugin) {
+
+  public Command(final Reservation plugin) {
     this.plugin = plugin;
-    this.logger = new PluginLogger(this.toString());
+    this.logger = new Logger(this.getClass());
+    this.handler = new ReservationHandler(this.getClass());
   }
 
-  public abstract void execute(CommandSender sender,
-      Map<String, String> arguments);
+  public abstract void execute(CommandSender sender, Map<String, Object> arguments);
 
   @Override
-  public boolean onCommand(final CommandSender sender,
-      final org.bukkit.command.Command command, final String label,
-      final String[] args) {
+  public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command command, final String label, final String[] args) {
     if (!this.authorisePlayer(sender)) {
-      sender.sendMessage(ChatColor.RED
-          + "You do not have permission to do that.");
+      sender.sendMessage(ChatColor.RED + "You do not have permission to do that.");
       return true;
     }
 
     try {
-      LinkedList<String> arguments = new LinkedList<String>();
+      final LinkedList<String> arguments = new LinkedList<String>();
       arguments.addAll(Arrays.asList(args));
-      final Map<String, String> parsedArguments = this
-          .parseArguments(arguments);
+      final Map<String, Object> parsedArguments = this.parseArguments(arguments);
       this.execute(sender, parsedArguments);
     } catch (final IllegalArgumentException e) {
       sender.sendMessage(ChatColor.RED + this.usage);
@@ -87,44 +83,21 @@ public abstract class Command implements CommandExecutor {
    * The player/console that is attempting to use the command
    * @return true if the player has permission; false otherwise.
    */
-  protected boolean authorisePlayer(CommandSender sender) {
-    if (sender instanceof ConsoleCommandSender) {
+  protected boolean authorisePlayer(final CommandSender sender) {
+    if (sender instanceof ConsoleCommandSender)
       return true;
-    } else if (sender instanceof Player) {
+    else if (sender instanceof Player) {
       final Player player = (Player) sender;
-      if (player.hasPermission(this.permission)
-          || player.hasPermission("reservation.*")) { return true; }
+      if (player.hasPermission(this.permission) || player.hasPermission("reservation.*")) return true;
     }
     return false;
   }
 
-  /**
-   * Get the name of a CommandSender.
-   * 
-   * By default a CommandSender which is not a Player has no name. In this case
-   * the method will return the value of consoleName.
-   * 
-   * @param sender
-   * The CommandSender that you wish to resolve the name of.
-   * @return name Return the name of the Player or "Console" if no name
-   * available.
-   */
-  protected String getSenderName(CommandSender sender) {
-    if (sender instanceof ConsoleCommandSender) {
-      return Command.consoleName;
-    } else {
-      final Player player = (Player) sender;
-      return player.getName();
-    }
-  }
+  protected abstract Map<String, Object> parseArguments(List<String> arguments);
 
-  protected abstract Map<String, String> parseArguments(List<String> arguments);
-
-  protected void registerPermission(final String name,
-      final String description, final PermissionDefault defaultValue) {
-    final Permission permission = new Permission(name, description,
-        defaultValue);
-    plugin.getServer().getPluginManager().addPermission(permission);
+  protected void registerPermission(final String name, final String description, final PermissionDefault defaultValue) {
+    final Permission permission = new Permission(name, description, defaultValue);
+    this.plugin.getServer().getPluginManager().addPermission(permission);
   }
 
 }
