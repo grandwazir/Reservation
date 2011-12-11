@@ -88,6 +88,7 @@ public class Reservation extends JavaPlugin {
     this.description = this.getDescription();
 
     try {
+      this.checkOnlineMode();
       this.loadConfiguration();
       this.isConfigurationSane();
       this.setupDatabase();
@@ -100,9 +101,9 @@ public class Reservation extends JavaPlugin {
     } catch (final IllegalArgumentException exception) {
       Reservation.logger.severe(exception.getMessage());
       this.pluginManager.disablePlugin(this);
-    } catch (final Exception exception) {
-      Reservation.logger.severe("Unknown exception has occured!");
-      exception.printStackTrace();
+    } catch (final IllegalStateException exception) {
+      Reservation.logger.severe(exception.getMessage());
+      this.pluginManager.disablePlugin(this);
     } finally {
       if (!this.pluginManager.isPluginEnabled(this)) return;
     }
@@ -111,6 +112,10 @@ public class Reservation extends JavaPlugin {
 
   }
 
+  private void checkOnlineMode() {
+    if (!this.getServer().getOnlineMode()) throw new IllegalStateException("Unable to function when online-mode is set to false!");
+  }
+  
   private void isConfigurationSane() {
     final int reservedSlots = ReservationConfiguration.getInstance().getReservedSlots();
     if ((this.getServer().getMaxPlayers() - reservedSlots) < 0) throw new IllegalArgumentException("Your total player slots must be equal or higher than the number of reserved slots.");
