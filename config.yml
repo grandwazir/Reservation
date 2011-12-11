@@ -1,5 +1,5 @@
 # Read more about these options at http://github.com/grandwazir/Reservation/wiki/instructions.
 
-debugging: true
+debugging: false
 reserved-slots: 2
 hide-reserved-slots: true
