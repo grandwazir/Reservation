@@ -1,6 +1,6 @@
 main: name.richardson.james.reservation.Reservation
 database: true
-version: 1.0.0
+version: 1.0.1
 name: Reservation
 description: Manage player slots on your server.
 website: https://github.com/grandwazir/Reservation

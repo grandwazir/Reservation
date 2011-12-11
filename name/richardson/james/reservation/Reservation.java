@@ -39,8 +39,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Reservation extends JavaPlugin {
-
-  public final static int BUILT_AGAINST = 1572;
+  
   private final static Logger logger = new Logger(Reservation.class);
   private CommandManager commandManager;
   private PluginDescriptionFile description;
@@ -57,19 +56,6 @@ public class Reservation extends JavaPlugin {
     return instance;
   }
 
-  private static void checkVersionCompatability() {
-    try {
-      int bukkitBuild = Integer.parseInt(Bukkit.getVersion().subSequence(33, 37).toString());
-      if (bukkitBuild < BUILT_AGAINST) {
-        Reservation.logger.warning(String.format("Reservation has not been tested with your build of Bukkit (%d).", bukkitBuild));
-        Reservation.logger.warning("It will most likely function correctly but you may encounter bugs.");
-        Reservation.logger.warning(String.format("To avoid problems upgrade to build %d or higher.", BUILT_AGAINST));
-      }
-    } catch (NumberFormatException exception) {
-      Reservation.logger.warning("Unable to determine Bukkit version.");
-    }
-  }
-
   @Override
   public List<Class<?>> getDatabaseClasses() {
     return Database.getDatabaseClasses();
@@ -82,7 +68,6 @@ public class Reservation extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    Reservation.checkVersionCompatability();
     this.commandManager = new CommandManager();
     this.pluginManager = this.getServer().getPluginManager();
     this.description = this.getDescription();

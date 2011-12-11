@@ -51,24 +51,26 @@ public class PlayerListener extends org.bukkit.event.player.PlayerListener {
   @Override
   public void onPlayerPreLogin(final PlayerPreLoginEvent event) {
     final String playerName = event.getName().toLowerCase();
-    if (isVisibleSlotsUsed() && reservations.containsKey(event.getName())) {
-      logger.debug(playerName + " is attempting to join a full server.");
-      if (isReservedSlotAvailable() && (reservations.get(playerName) == ReservationRecord.Type.FULL)) {
-        logger.debug(playerName + " using a reserved slot.");
-        event.allow();
-      } else if (isServerFull()) {
-        if (kickPlayer()) {
-          logger.debug("Kicked another player so " + playerName + "could join.");
+    if (isVisibleSlotsUsed()) {
+      if (reservations.containsKey(event.getName())) {
+        logger.debug(playerName + " is attempting to join a full server.");
+        if (isReservedSlotAvailable() && (reservations.get(playerName) == ReservationRecord.Type.FULL)) {
+          logger.debug(playerName + " using a reserved slot.");
           event.allow();
+        } else if (isServerFull()) {
+          if (kickPlayer()) {
+            logger.debug("Kicked another player so " + playerName + "could join.");
+            event.allow();
+          }
+        } else {
+          logger.debug("Unable to make room for " + playerName);
+          event.disallow(Result.KICK_FULL, "The server is full!");
         }
       } else {
-        logger.debug("Unable to make room for " + playerName);
+        logger.debug("No visible slots available for " + playerName + ".");
         event.disallow(Result.KICK_FULL, "The server is full!");
       }
-    } else {
-      logger.debug("No visible slots available for " + playerName + ".");
-      event.disallow(Result.KICK_FULL, "The server is full!");
-    }
+    } 
   }
 
   private boolean isReservedSlotAvailable() {
