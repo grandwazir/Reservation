@@ -28,7 +28,7 @@ Older versions are available as well, however they are not supported.
 
     http://downloads.james.richardson.name/public/binaries/reservation/
 
-### Configuration
+## Configuration
 
 Configure your settings in config.yml. The configuration file can be found in the datafolder for the plugin which is usually: 
 
