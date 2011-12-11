@@ -11,7 +11,7 @@ public class ReservationConfiguration extends Configuration {
 
   protected final static Logger logger = new Logger(ReservationConfiguration.class);
   protected final static String fileName = "config.yml";
-  
+
   protected final InputStream defaults = Reservation.getInstance().getResource(fileName);
 
   public ReservationConfiguration() throws IOException {

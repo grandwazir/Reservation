@@ -28,7 +28,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 public class ServerListener extends org.bukkit.event.server.ServerListener {
 
   private final static Logger logger = new Logger(ServerListener.class);
- 
+
   private final int maxSlots;
   private final int visibleSlots;
   private final int reservedSlots;

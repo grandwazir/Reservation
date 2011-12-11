@@ -40,7 +40,7 @@ public abstract class Command implements CommandExecutor {
   protected final Reservation plugin;
   protected final Logger logger;
   protected final ReservationRecordHandler handler;
-  
+
   protected String description;
   protected String name;
   protected String permission;

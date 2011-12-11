@@ -79,7 +79,7 @@ public class Reservation extends JavaPlugin {
   public void onDisable() {
     Reservation.logger.info(this.description.getName() + " is now disabled.");
   }
-  
+
   @Override
   public void onEnable() {
     Reservation.checkVersionCompatability();
