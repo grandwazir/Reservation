@@ -3,7 +3,7 @@ Reservation - Manage player slots on your server.
 
 ## Description
 
-Reservation is plugin for the Minecraft wrapper [Bukkit](http://bukkit.org/)Bukkit that provides a method for administrators to manage player slots on their server. 
+Reservation is plugin for the Minecraft wrapper [Bukkit](http://bukkit.org/) that provides a method for administrators to manage player slots on their server. 
 
 There are currently two supported modes:
 
