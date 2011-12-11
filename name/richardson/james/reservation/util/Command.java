@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.ReservationHandler;
+import name.richardson.james.reservation.database.ReservationRecordHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -37,20 +37,19 @@ import org.bukkit.permissions.PermissionDefault;
 
 public abstract class Command implements CommandExecutor {
 
-  protected final static String consoleName = "Console";
+  protected final Reservation plugin;
+  protected final Logger logger;
+  protected final ReservationRecordHandler handler;
+  
   protected String description;
   protected String name;
   protected String permission;
-  protected final Reservation plugin;
-  protected final Logger logger;
-  protected final ReservationHandler handler;
   protected String usage;
-
 
   public Command(final Reservation plugin) {
     this.plugin = plugin;
     this.logger = new Logger(this.getClass());
-    this.handler = new ReservationHandler(this.getClass());
+    this.handler = new ReservationRecordHandler(this.getClass());
   }
 
   public abstract void execute(CommandSender sender, Map<String, Object> arguments);

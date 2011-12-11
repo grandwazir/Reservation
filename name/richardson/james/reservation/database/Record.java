@@ -17,7 +17,7 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.reservation;
+package name.richardson.james.reservation.database;
 
 import java.util.List;
 import java.util.Set;
@@ -30,8 +30,8 @@ import com.avaje.ebean.LikeType;
 
 public abstract class Record {
 
-  protected static Logger logger = new Logger(Record.class);
-  
+  protected final static Logger logger = new Logger(Record.class);
+
   /**
    * Return the total number of records matching the example record.
    * 
@@ -106,6 +106,9 @@ public abstract class Record {
     return Database.getInstance().save(records);
   }
 
+  @Override
+  public abstract String toString();
+
   /**
    * Return the total number of records associated with this class.
    * 
@@ -127,8 +130,5 @@ public abstract class Record {
     Record.logger.debug(this.toString());
     Database.getInstance().save(this);
   }
-
-  @Override
-  public abstract String toString();
 
 }

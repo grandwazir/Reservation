@@ -68,6 +68,16 @@ public class Logger {
   }
 
   /**
+   * Log a configuration message with this logger.
+   * 
+   * @param message
+   * The string that you wish to log.
+   */
+  public void config(final String message) {
+    this.logger.config(Logger.prefix + "<" + this.logger.getName() + "> " + message);
+  }
+
+  /**
    * Log a debug message with this logger.
    * 
    * @param message
@@ -77,16 +87,6 @@ public class Logger {
     this.logger.fine(Logger.prefix + "<" + this.logger.getName() + "> " + message);
   }
 
-  /**
-   * Log a configuration message with this logger.
-   * 
-   * @param message
-   * The string that you wish to log.
-   */
-  public void config(final String message) {
-    this.logger.config(Logger.prefix + "<" + this.logger.getName() + "> " + message);
-  }
-  
   /**
    * Log a general message with this logger.
    * 

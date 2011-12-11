@@ -20,7 +20,6 @@
 package name.richardson.james.reservation;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.persistence.PersistenceException;
@@ -28,11 +27,12 @@ import javax.persistence.PersistenceException;
 import name.richardson.james.reservation.administration.AddCommand;
 import name.richardson.james.reservation.administration.ListCommand;
 import name.richardson.james.reservation.administration.RemoveCommand;
+import name.richardson.james.reservation.database.ReservationRecord;
 import name.richardson.james.reservation.motd.ServerListener;
-import name.richardson.james.reservation.util.Configuration;
 import name.richardson.james.reservation.util.Database;
 import name.richardson.james.reservation.util.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -40,13 +40,35 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Reservation extends JavaPlugin {
 
-  private final Logger logger = new Logger(this.getClass());
+  public final static int BUILT_AGAINST = 1572;
+  private final static Logger logger = new Logger(Reservation.class);
   private CommandManager commandManager;
-  private Configuration configuration;
   private PluginDescriptionFile description;
   private PlayerListener playerListener;
   private PluginManager pluginManager;
   private ServerListener serverListener;
+  private static Reservation instance;
+
+  public Reservation() {
+    Reservation.instance = this;
+  }
+
+  public static Reservation getInstance() {
+    return instance;
+  }
+
+  private static void checkVersionCompatability() {
+    try {
+      int bukkitBuild = Integer.parseInt(Bukkit.getVersion().subSequence(33, 37).toString());
+      if (bukkitBuild < BUILT_AGAINST) {
+        Reservation.logger.warning(String.format("Reservation has not been tested with your build of Bukkit (%d).", bukkitBuild));
+        Reservation.logger.warning("It will most likely function correctly but you may encounter bugs.");
+        Reservation.logger.warning(String.format("To avoid problems upgrade to build %d or higher.", BUILT_AGAINST));
+      }
+    } catch (NumberFormatException exception) {
+      Reservation.logger.warning("Unable to determine Bukkit version.");
+    }
+  }
 
   @Override
   public List<Class<?>> getDatabaseClasses() {
@@ -55,62 +77,61 @@ public class Reservation extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    this.logger.info(this.description.getName() + " is now disabled.");
+    Reservation.logger.info(this.description.getName() + " is now disabled.");
   }
-
+  
   @Override
   public void onEnable() {
+    Reservation.checkVersionCompatability();
     this.commandManager = new CommandManager();
     this.pluginManager = this.getServer().getPluginManager();
     this.description = this.getDescription();
 
     try {
-      this.configuration = this.loadConfiguration();
+      this.loadConfiguration();
       this.isConfigurationSane();
       this.setupDatabase();
       new Database(this);
       this.registerListeners();
       this.setupCommands();
     } catch (final IOException exception) {
-      this.logger.severe("Unable to load configuration!");
+      Reservation.logger.severe("Unable to load configuration!");
       this.pluginManager.disablePlugin(this);
     } catch (final IllegalArgumentException exception) {
-      this.logger.severe(exception.getMessage());
+      Reservation.logger.severe(exception.getMessage());
       this.pluginManager.disablePlugin(this);
     } catch (final Exception exception) {
-      this.logger.severe("Unknown exception has occured!");
+      Reservation.logger.severe("Unknown exception has occured!");
       exception.printStackTrace();
     } finally {
       if (!this.pluginManager.isPluginEnabled(this)) return;
     }
 
-    this.logger.info(this.description.getFullName() + " is now enabled.");
+    Reservation.logger.info(this.description.getFullName() + " is now enabled.");
 
   }
 
   private void isConfigurationSane() {
-    final int reservedSlots = this.configuration.getReservedSlots();
+    final int reservedSlots = ReservationConfiguration.getInstance().getReservedSlots();
     if ((this.getServer().getMaxPlayers() - reservedSlots) < 0) throw new IllegalArgumentException("Your total player slots must be equal or higher than the number of reserved slots.");
   }
 
-  private Configuration loadConfiguration() throws IOException {
-    final InputStream defaultConfigurationStream = this.getResource("config.yml");
-    final Configuration configuration = new Configuration(this.getDataFolder(), defaultConfigurationStream);
-    // enable debugging if necessary
+  private void loadConfiguration() throws IOException {
+    ReservationConfiguration configuration = new ReservationConfiguration();
     if (configuration.isDebugging()) {
       Logger.enableDebugging();
       configuration.logValues();
     }
-    return configuration;
   }
 
   private void registerListeners() {
     final PluginManager pm = this.getServer().getPluginManager();
     this.playerListener = new PlayerListener(this.getServer());
-    this.serverListener = new ServerListener(this.getServer());
     pm.registerEvent(Event.Type.PLAYER_PRELOGIN, this.playerListener, Event.Priority.High, this);
-    pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener, Event.Priority.Normal, this);
-
+    if (ReservationConfiguration.getInstance().isHideReservedSlots()) {
+      this.serverListener = new ServerListener(this.getServer());
+      pm.registerEvent(Event.Type.SERVER_LIST_PING, this.serverListener, Event.Priority.Normal, this);
+    }
   }
 
   private void setupCommands() {
@@ -124,7 +145,7 @@ public class Reservation extends JavaPlugin {
     try {
       this.getDatabase().find(ReservationRecord.class).findRowCount();
     } catch (final PersistenceException ex) {
-      this.logger.warning("No database schema found. Generating a new one.");
+      Reservation.logger.warning("No database schema found. Generating a new one.");
       this.installDDL();
     }
   }

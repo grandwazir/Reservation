@@ -19,30 +19,30 @@
 
 package name.richardson.james.reservation.motd;
 
-import name.richardson.james.reservation.util.Configuration;
+import name.richardson.james.reservation.ReservationConfiguration;
+import name.richardson.james.reservation.util.Logger;
 
 import org.bukkit.Server;
 import org.bukkit.event.server.ServerListPingEvent;
 
 public class ServerListener extends org.bukkit.event.server.ServerListener {
 
-  private final boolean hideReservedSlots;
+  private final static Logger logger = new Logger(ServerListener.class);
+ 
   private final int maxSlots;
   private final int visibleSlots;
   private final int reservedSlots;
 
   public ServerListener(final Server server) {
-    this.reservedSlots = Configuration.getInstance().getReservedSlots();
-    this.hideReservedSlots = Configuration.getInstance().isHideReservedSlots();
+    this.reservedSlots = ReservationConfiguration.getInstance().getReservedSlots();
     this.maxSlots = server.getMaxPlayers();
     this.visibleSlots = maxSlots - reservedSlots;
   }
 
   @Override
   public void onServerListPing(final ServerListPingEvent event) {
-    if (this.hideReservedSlots) {
-      event.setMaxPlayers(visibleSlots);
-    }
+    logger.debug(String.format("Displaying %d player slots while %d slots are actually available", visibleSlots, maxSlots));
+    event.setMaxPlayers(visibleSlots);
   }
 
 }

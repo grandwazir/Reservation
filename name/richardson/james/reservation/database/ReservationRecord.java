@@ -17,7 +17,7 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.reservation;
+package name.richardson.james.reservation.database;
 
 import java.util.List;
 
@@ -26,30 +26,66 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import name.richardson.james.reservation.util.Database;
-
-
+import name.richardson.james.reservation.util.Logger;
 
 import com.avaje.ebean.validation.NotNull;
-
 
 @Entity()
 @Table(name = "reservation_list")
 public class ReservationRecord extends Record {
-  
+
   public enum Type {
     FULL,
     KICK
   }
+
+  protected final static Logger logger = new Logger(ReservationRecord.class);
 
   @NotNull
   private long createdAt;
 
   @Id
   private String playerName;
-  
+
   @NotNull
   private ReservationRecord.Type reservationType;
-  
+
+  protected static void create(String playerName, ReservationRecord.Type reservationType) {
+    ReservationRecord record = new ReservationRecord();
+    record.setCreatedAt(System.currentTimeMillis());
+    record.setPlayerName(playerName);
+    record.setReservationType(reservationType);
+    record.save();
+  }
+
+  protected static List<ReservationRecord> list() {
+    return Database.getInstance().find(ReservationRecord.class).findList();
+  }
+
+  public long getCreatedAt() {
+    return createdAt;
+  }
+
+  public String getPlayerName() {
+    return playerName;
+  }
+
+  public ReservationRecord.Type getReservationType() {
+    return reservationType;
+  }
+
+  public void setCreatedAt(long createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public void setPlayerName(String playerName) {
+    this.playerName = playerName;
+  }
+
+  public void setReservationType(ReservationRecord.Type reservationType) {
+    this.reservationType = reservationType;
+  }
+
   @Override
   public String toString() {
     StringBuilder message = new StringBuilder();
@@ -60,40 +96,4 @@ public class ReservationRecord extends Record {
     return message.toString();
   }
 
-  public long getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(long createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  public String getPlayerName() {
-    return playerName;
-  }
-
-  public void setPlayerName(String playerName) {
-    this.playerName = playerName;
-  }
-
-  public ReservationRecord.Type getReservationType() {
-    return reservationType;
-  }
-
-  public void setReservationType(ReservationRecord.Type reservationType) {
-    this.reservationType = reservationType;
-  }
-
-  protected static List<ReservationRecord> list() {
-    return Database.getInstance().find(ReservationRecord.class).findList();
-  }
-  
-  protected static void create(String playerName, ReservationRecord.Type reservationType) {
-    ReservationRecord record = new ReservationRecord();
-    record.setCreatedAt(System.currentTimeMillis());
-    record.setPlayerName(playerName);
-    record.setReservationType(reservationType);
-    record.save();
-  }
-  
 }

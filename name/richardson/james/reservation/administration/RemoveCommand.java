@@ -45,7 +45,7 @@ public class RemoveCommand extends Command {
   @Override
   public void execute(final CommandSender sender, final Map<String, Object> arguments) {
     final OfflinePlayer player = (OfflinePlayer) arguments.get("player");
-    
+
     if (this.handler.removeReservation(player)) {
       sender.sendMessage(String.format(ChatColor.GREEN + "%s has been removed from the reserved list.", player.getName()));
       this.logger.info(String.format("%s removed %s from the reserved list.", sender.getName(), player.getName()));

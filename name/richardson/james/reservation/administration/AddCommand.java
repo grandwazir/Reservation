@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.ReservationRecord;
-import name.richardson.james.reservation.ReservationRecord.Type;
+import name.richardson.james.reservation.database.ReservationRecord;
+import name.richardson.james.reservation.database.ReservationRecord.Type;
 import name.richardson.james.reservation.util.Command;
 
 import org.bukkit.ChatColor;
@@ -48,7 +48,7 @@ public class AddCommand extends Command {
   public void execute(final CommandSender sender, final Map<String, Object> arguments) {
     final OfflinePlayer player = (OfflinePlayer) arguments.get("player");
     final Type reservationType = (Type) arguments.get("reservationType");
-    
+
     if (this.handler.addReservation(player, reservationType)) {
       sender.sendMessage(String.format(ChatColor.GREEN + "%s added to reserved list.", player.getName()));
       this.logger.info(String.format("%s added %s to reserved list.", sender.getName(), player.getName()));
@@ -68,7 +68,7 @@ public class AddCommand extends Command {
     } catch (final IndexOutOfBoundsException exception) {
       throw new IllegalArgumentException("You must specify both a name and a reservation type.");
     } catch (final IllegalArgumentException exception) {
-      throw new IllegalArgumentException("Use RESERVED or KICK as the type.");
+      throw new IllegalArgumentException("Use FULL or KICK as the type.");
     }
 
     return m;

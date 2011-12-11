@@ -22,9 +22,9 @@ package name.richardson.james.reservation.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import name.richardson.james.reservation.Record;
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.ReservationRecord;
+import name.richardson.james.reservation.database.Record;
+import name.richardson.james.reservation.database.ReservationRecord;
 
 import com.avaje.ebean.EbeanServer;
 
@@ -35,7 +35,7 @@ public class Database {
   private static Database instance;
   private static EbeanServer pluginDatabase;
 
-  private final Logger logger = new Logger(this.getClass());
+  private final static Logger logger = new Logger(Database.class);
 
   /**
    * Creates a new instance if one does not already exist.
@@ -46,7 +46,7 @@ public class Database {
   public Database(final Reservation plugin) {
     if (Database.instance != null) throw new IllegalStateException();
     Database.pluginDatabase = plugin.getDatabase();
-    this.logger.config("Database configured.");
+    logger.config("Database configured.");
     this.validate();
     Database.instance = this;
   }
@@ -72,7 +72,7 @@ public class Database {
    * Validates the current database schema and updates it if necessary.
    */
   private void validate() {
-    this.logger.config("Current schema version " + Integer.toString(Database.SCHEMA));
+    logger.config("Current schema version " + Integer.toString(Database.SCHEMA));
   }
 
 }

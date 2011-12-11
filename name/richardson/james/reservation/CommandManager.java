@@ -31,25 +31,25 @@ public class CommandManager implements CommandExecutor {
   private final HashMap<String, CommandExecutor> commands = new HashMap<String, CommandExecutor>();
 
   @Override
-  public boolean onCommand(final CommandSender sender, final Command command,
-      final String label, final String[] args) {
-    
+  public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+
     if (args.length != 0) {
       if (this.commands.containsKey(args[0])) {
         this.commands.get(args[0]).onCommand(sender, command, label, args);
         return true;
       }
     }
-     
+
     sender.sendMessage(ChatColor.RED + "Invalid command!");
     sender.sendMessage(ChatColor.YELLOW + "/reserve [add|remove|list]");
     return true;
   }
 
   /**
-   * Register a sub command underneath the root command defined the executor was created.
+   * Register a sub command underneath the root command defined the executor was
+   * created.
    * 
-   * @param commandName 
+   * @param commandName
    * The string to associated this command with (without the prefix).
    * @param command
    * An instance of the command that should be registered.

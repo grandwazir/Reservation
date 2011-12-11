@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.ReservationRecord;
-import name.richardson.james.reservation.ReservationRecord.Type;
+import name.richardson.james.reservation.database.ReservationRecord;
+import name.richardson.james.reservation.database.ReservationRecord.Type;
 import name.richardson.james.reservation.util.Command;
 
 import org.bukkit.ChatColor;
