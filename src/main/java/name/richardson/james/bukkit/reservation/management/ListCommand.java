@@ -17,7 +17,7 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.bukkit.reservation.administration;
+package name.richardson.james.bukkit.reservation.management;
 
 import java.util.Map;
 import java.util.Map.Entry;

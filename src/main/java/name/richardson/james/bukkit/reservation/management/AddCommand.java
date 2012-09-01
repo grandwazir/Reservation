@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Copyright (c) 2011 James Richardson.
  * 
- * RemoveCommand.java is part of Reservation.
+ * AddCommand.java is part of Reservation.
  * 
  * Reservation is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,36 +17,47 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.bukkit.reservation.administration;
+package name.richardson.james.bukkit.reservation.management;
+
+import org.bukkit.command.CommandSender;
 
 import name.richardson.james.bukkit.reservation.Reservation;
+import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 
-import org.bukkit.command.CommandSender;
 
-public class RemoveCommand extends AbstractCommand {
+public class AddCommand extends AbstractCommand {
 
-  private String player;
+  private ReservationType reservation;
   
-  private final  Reservation plugin;
+  private String player;
 
-  public RemoveCommand(final Reservation plugin) {
+  private final Reservation plugin;
+
+  public AddCommand(final Reservation plugin) {
     super(plugin, false);
     this.plugin = plugin;
   }
 
   public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    this.plugin.removePlayer(player);
-    sender.sendMessage(this.getLocalisation().getMessage(this, "player-removed", player));
+    this.plugin.addPlayer(player, reservation);
+    sender.sendMessage(this.getLocalisation().getMessage(this, "player-added", player));
   }
 
   public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
-    if (arguments.length != 1) throw new CommandArgumentException(this.getUsage(), null);
+    if (arguments.length != 2) throw new CommandArgumentException(this.getUsage(), null);
     this.player = arguments[0];
+    try {
+      this.reservation = ReservationType.valueOf(arguments[1]);
+    } catch (final IndexOutOfBoundsException exception) {
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-valid-reservation"), this.getLocalisation().getMessage(this, "valid-reservations"));
+    } catch (final IllegalArgumentException exception) {
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-valid-reservation"), this.getLocalisation().getMessage(this, "valid-reservations"));
+    } 
   }
 
-
+  
 }

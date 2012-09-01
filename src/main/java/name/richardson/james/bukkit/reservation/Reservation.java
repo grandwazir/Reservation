@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.util.Map;
 
 import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
-import name.richardson.james.bukkit.reservation.administration.AddCommand;
-import name.richardson.james.bukkit.reservation.administration.ListCommand;
-import name.richardson.james.bukkit.reservation.administration.RemoveCommand;
+import name.richardson.james.bukkit.reservation.management.AddCommand;
+import name.richardson.james.bukkit.reservation.management.ListCommand;
+import name.richardson.james.bukkit.reservation.management.RemoveCommand;
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 
