@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 James Richardson.
+ * Copyright (c) 2012 James Richardson.
  * 
  * RemoveCommand.java is part of Reservation.
  * 
@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License along with
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-
 package name.richardson.james.bukkit.reservation.management;
+
+import org.bukkit.command.CommandSender;
 
 import name.richardson.james.bukkit.reservation.Reservation;
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
@@ -25,28 +26,27 @@ import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 
-import org.bukkit.command.CommandSender;
-
 public class RemoveCommand extends AbstractCommand {
 
   private String player;
-  
-  private final  Reservation plugin;
+
+  private final Reservation plugin;
 
   public RemoveCommand(final Reservation plugin) {
     super(plugin, false);
     this.plugin = plugin;
   }
 
-  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    this.plugin.removePlayer(player);
-    sender.sendMessage(this.getLocalisation().getMessage(this, "player-removed", player));
+  public void execute(final CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+    this.plugin.removePlayer(this.player);
+    sender.sendMessage(this.getLocalisation().getMessage(this, "player-removed", this.player));
   }
 
-  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
-    if (arguments.length != 1) throw new CommandArgumentException(this.getUsage(), null);
+  public void parseArguments(final String[] arguments, final CommandSender sender) throws CommandArgumentException {
+    if (arguments.length != 1) {
+      throw new CommandArgumentException(this.getUsage(), null);
+    }
     this.player = arguments[0];
   }
-
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 James Richardson.
+ * Copyright (c) 2012 James Richardson.
  * 
  * Reservation.java is part of Reservation.
  * 
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License along with
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-
 package name.richardson.james.bukkit.reservation;
 
 import java.io.IOException;
@@ -30,13 +29,34 @@ import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
 
 public class Reservation extends AbstractPlugin {
-  
+
   private ReservationConfiguration configuration;
 
-  public void registerListeners() {
-    new PlayerListener(this, this.configuration.getPlayers());
+  public void addPlayer(final String name, final ReservationType type) {
+    final Map<String, ReservationType> players = this.configuration.getPlayers();
+    players.put(name, type);
+    this.configuration.setPlayers(players);
   }
 
+  public String getArtifactID() {
+    return "reservation";
+  }
+
+  public int getHiddenSlotCount() {
+    return (this.configuration.isHideReservedSlots()) ? this.configuration.getReservedSlots() : 0;
+  }
+
+  public int getReservedSlotCount() {
+    return this.configuration.getReservedSlots();
+  }
+
+  @Override
+  public void loadConfiguration() throws IOException {
+    super.loadConfiguration();
+    this.configuration = new ReservationConfiguration(this);
+  }
+
+  @Override
   public void registerCommands() {
     final CommandManager commandManager = new CommandManager(this);
     this.getCommand("reserve").setExecutor(commandManager);
@@ -44,35 +64,16 @@ public class Reservation extends AbstractPlugin {
     commandManager.addCommand(new RemoveCommand(this));
     commandManager.addCommand(new ListCommand(this, this.configuration.getPlayers()));
   }
-  
+
   @Override
-  public void loadConfiguration() throws IOException {
-    super.loadConfiguration();
-    this.configuration = new ReservationConfiguration(this);
-  }
-  
-  public String getArtifactID() {
-    return "reservation";
-  }
-  
-  public void addPlayer(String name, ReservationType type) {
-    final Map<String, ReservationType>players = this.configuration.getPlayers();
-    players.put(name, type);
-    this.configuration.setPlayers(players);
+  public void registerListeners() {
+    new PlayerListener(this, this.configuration.getPlayers());
   }
 
-  public void removePlayer(String name) {
-    final Map<String, ReservationType>players = this.configuration.getPlayers();
+  public void removePlayer(final String name) {
+    final Map<String, ReservationType> players = this.configuration.getPlayers();
     players.remove(name);
     this.configuration.setPlayers(players);
   }
-  
-  public int getHiddenSlotCount() {
-    return (this.configuration.isHideReservedSlots()) ? this.configuration.getReservedSlots() : 0;
-  }
-  
-  public int getReservedSlotCount() {
-    return this.configuration.getReservedSlots();
-  }
-  
+
 }

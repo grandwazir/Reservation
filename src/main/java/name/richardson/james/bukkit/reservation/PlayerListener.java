@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 James Richardson.
+ * Copyright (c) 2012 James Richardson.
  * 
  * PlayerListener.java is part of Reservation.
  * 
@@ -16,14 +16,9 @@
  * You should have received a copy of the GNU General Public License along with
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-
 package name.richardson.james.bukkit.reservation;
 
 import java.util.Map;
-
-import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
-import name.richardson.james.bukkit.utilities.listener.Listener;
-import name.richardson.james.bukkit.utilities.localisation.Localisation;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -32,17 +27,21 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
+import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
+import name.richardson.james.bukkit.utilities.listener.Listener;
+import name.richardson.james.bukkit.utilities.localisation.Localisation;
+
 public class PlayerListener implements Listener {
 
   public enum ServerState {
-    NOT_FULL,
     FULL,
+    NOT_FULL,
     RESERVED_AVAILABLE
   }
-  
+
+  private final Localisation localisation;
   private final Reservation plugin;
   private final Map<String, ReservationType> reservedPlayers;
-  private final Localisation localisation;
 
   public PlayerListener(final Reservation plugin, final Map<String, ReservationType> reservedPlayers) {
     this.reservedPlayers = reservedPlayers;
@@ -50,23 +49,23 @@ public class PlayerListener implements Listener {
     this.localisation = plugin.getLocalisation();
   }
 
-  @EventHandler(priority=EventPriority.NORMAL, ignoreCancelled=true)
+  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void onPlayerPreLogin(final PlayerPreLoginEvent event) {
     final String playerName = event.getName().toLowerCase();
-    final ReservationType reservation = reservedPlayers.get(playerName);
-    
+    final ReservationType reservation = this.reservedPlayers.get(playerName);
+
     switch (this.getServerState()) {
     case NOT_FULL:
       event.allow();
     case FULL:
-      if (reservation != null && this.kickPlayer()) {
+      if ((reservation != null) && this.kickPlayer()) {
         event.allow();
       } else {
         event.disallow(PlayerPreLoginEvent.Result.KICK_FULL, this.localisation.getMessage(this, "server-full"));
       }
       break;
     case RESERVED_AVAILABLE:
-      if (reservation == ReservationType.KICK && this.kickPlayer()) {
+      if ((reservation == ReservationType.KICK) && this.kickPlayer()) {
         event.allow();
       } else if (reservation == ReservationType.FULL) {
         event.allow();
@@ -75,21 +74,21 @@ public class PlayerListener implements Listener {
       }
       break;
     }
-  
+
   }
-  
-  @EventHandler(priority=EventPriority.NORMAL, ignoreCancelled=true)
+
+  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void onServerListPing(final ServerListPingEvent event) {
-    event.setMaxPlayers(event.getMaxPlayers() - plugin.getHiddenSlotCount());
+    event.setMaxPlayers(event.getMaxPlayers() - this.plugin.getHiddenSlotCount());
   }
-  
+
   private ServerState getServerState() {
-    int playerCount = Bukkit.getServer().getOnlinePlayers().length;
-    int maxPlayers = Bukkit.getServer().getMaxPlayers();
-    int reservedSlots = plugin.getReservedSlotCount();
+    final int playerCount = Bukkit.getServer().getOnlinePlayers().length;
+    final int maxPlayers = Bukkit.getServer().getMaxPlayers();
+    final int reservedSlots = this.plugin.getReservedSlotCount();
     if (playerCount == maxPlayers) {
       return ServerState.FULL;
-    } else if (playerCount >= maxPlayers - reservedSlots) {
+    } else if (playerCount >= (maxPlayers - reservedSlots)) {
       return ServerState.RESERVED_AVAILABLE;
     } else {
       return ServerState.NOT_FULL;

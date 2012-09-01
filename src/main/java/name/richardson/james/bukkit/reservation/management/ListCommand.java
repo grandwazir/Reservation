@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 James Richardson.
+ * Copyright (c) 2012 James Richardson.
  * 
  * ListCommand.java is part of Reservation.
  * 
@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License along with
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-
 package name.richardson.james.bukkit.reservation.management;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.bukkit.command.CommandSender;
 
 import name.richardson.james.bukkit.reservation.Reservation;
 import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
@@ -30,31 +31,40 @@ import name.richardson.james.bukkit.utilities.command.CommandPermissionException
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
 
-import org.bukkit.command.CommandSender;
-
 public class ListCommand extends AbstractCommand {
 
-  private final Map<String, ReservationType> reservedPlayers;
-  
   private final ChoiceFormatter formatter;
 
-  public ListCommand(final Reservation plugin, Map<String, ReservationType> players) {
+  private final Map<String, ReservationType> reservedPlayers;
+
+  public ListCommand(final Reservation plugin, final Map<String, ReservationType> players) {
     super(plugin, false);
     this.reservedPlayers = players;
     this.formatter = new ChoiceFormatter(this.getLocalisation());
     this.formatter.setLimits(0, 1, 2);
     this.formatter.setMessage(this, "header");
-    this.formatter.setArguments(reservedPlayers.size());
-    this.formatter.setFormats(
-        this.getLocalisation().getMessage(this, "no-players"), 
-        this.getLocalisation().getMessage(this, "one-player"), 
-        this.getLocalisation().getMessage(this, "many-players")
-    );
+    this.formatter.setArguments(this.reservedPlayers.size());
+    this.formatter.setFormats(this.getLocalisation().getMessage(this, "no-players"), this.getLocalisation().getMessage(this, "one-player"), this.getLocalisation().getMessage(this, "many-players"));
+  }
+
+  public void execute(final CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+    if (this.reservedPlayers.isEmpty()) {
+      sender.sendMessage(this.getLocalisation().getMessage(this, "no-players"));
+    } else {
+      this.formatter.setArguments(this.reservedPlayers.size());
+      final String list = this.buildList();
+      sender.sendMessage(this.formatter.getMessage());
+      sender.sendMessage(list);
+    }
+  }
+
+  public void parseArguments(final String[] arguments, final CommandSender sender) throws CommandArgumentException {
+    return;
   }
 
   private String buildList() {
     final StringBuilder list = new StringBuilder();
-    for (Entry<String, ReservationType> entry : reservedPlayers.entrySet()) {
+    for (final Entry<String, ReservationType> entry : this.reservedPlayers.entrySet()) {
       list.append(entry.getKey());
       list.append(" (");
       list.append(entry.getValue());
@@ -63,22 +73,6 @@ public class ListCommand extends AbstractCommand {
     }
     list.delete(list.length() - 2, list.length());
     return list.toString();
-  }
-
-
-  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    if (reservedPlayers.isEmpty()) {
-      sender.sendMessage(this.getLocalisation().getMessage(this, "no-players"));
-    } else {
-      this.formatter.setArguments(reservedPlayers.size());
-      final String list = this.buildList();
-      sender.sendMessage(this.formatter.getMessage());
-      sender.sendMessage(list);
-    }
-  }
-
-  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
-    return;
   }
 
 }
