@@ -25,7 +25,9 @@ import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.command.ConsoleCommand;
 
+@ConsoleCommand
 public class RemoveCommand extends AbstractCommand {
 
   private String player;
@@ -44,7 +46,7 @@ public class RemoveCommand extends AbstractCommand {
 
   public void parseArguments(final String[] arguments, final CommandSender sender) throws CommandArgumentException {
     if (arguments.length != 1) {
-      throw new CommandArgumentException(this.getUsage(), null);
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-arguments"), null);
     }
     this.player = arguments[0];
   }

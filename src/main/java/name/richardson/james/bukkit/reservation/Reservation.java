@@ -19,7 +19,6 @@
 package name.richardson.james.bukkit.reservation;
 
 import java.io.IOException;
-import java.util.Map;
 
 import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
 import name.richardson.james.bukkit.reservation.management.AddCommand;
@@ -33,9 +32,7 @@ public class Reservation extends AbstractPlugin {
   private ReservationConfiguration configuration;
 
   public void addPlayer(final String name, final ReservationType type) {
-    final Map<String, ReservationType> players = this.configuration.getPlayers();
-    players.put(name, type);
-    this.configuration.setPlayers(players);
+    this.configuration.addPlayer(name, type);
   }
 
   public String getArtifactID() {
@@ -61,8 +58,8 @@ public class Reservation extends AbstractPlugin {
     final CommandManager commandManager = new CommandManager(this);
     this.getCommand("reserve").setExecutor(commandManager);
     commandManager.addCommand(new AddCommand(this));
-    commandManager.addCommand(new RemoveCommand(this));
     commandManager.addCommand(new ListCommand(this, this.configuration.getPlayers()));
+    commandManager.addCommand(new RemoveCommand(this));
   }
 
   @Override
@@ -71,9 +68,7 @@ public class Reservation extends AbstractPlugin {
   }
 
   public void removePlayer(final String name) {
-    final Map<String, ReservationType> players = this.configuration.getPlayers();
-    players.remove(name);
-    this.configuration.setPlayers(players);
+    this.configuration.removePlayer(name);
   }
 
 }

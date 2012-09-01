@@ -21,6 +21,7 @@ package name.richardson.james.bukkit.reservation.management;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import name.richardson.james.bukkit.reservation.Reservation;
@@ -29,8 +30,10 @@ import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.command.ConsoleCommand;
 import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
 
+@ConsoleCommand
 public class ListCommand extends AbstractCommand {
 
   private final ChoiceFormatter formatter;
@@ -48,15 +51,11 @@ public class ListCommand extends AbstractCommand {
   }
 
   public void execute(final CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
-    if (this.reservedPlayers.isEmpty()) {
-      sender.sendMessage(this.getLocalisation().getMessage(this, "no-players"));
-    } else {
-      this.formatter.setArguments(this.reservedPlayers.size());
-      final String list = this.buildList();
-      sender.sendMessage(this.formatter.getMessage());
-      sender.sendMessage(list);
-    }
+    this.formatter.setArguments(this.reservedPlayers.size());
+    sender.sendMessage(this.formatter.getMessage());
+    if (!this.reservedPlayers.isEmpty()) sender.sendMessage(this.buildList());
   }
+  
 
   public void parseArguments(final String[] arguments, final CommandSender sender) throws CommandArgumentException {
     return;
@@ -64,6 +63,7 @@ public class ListCommand extends AbstractCommand {
 
   private String buildList() {
     final StringBuilder list = new StringBuilder();
+    list.append(ChatColor.YELLOW);
     for (final Entry<String, ReservationType> entry : this.reservedPlayers.entrySet()) {
       list.append(entry.getKey());
       list.append(" (");

@@ -19,13 +19,19 @@
 package name.richardson.james.bukkit.reservation;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.configuration.ConfigurationSection;
 
 import name.richardson.james.bukkit.utilities.configuration.PluginConfiguration;
 import name.richardson.james.bukkit.utilities.plugin.Plugin;
 
 public class ReservationConfiguration extends PluginConfiguration {
 
+  private final Map<String, ReservationType> reservedPlayers = new HashMap<String, ReservationType>();
+  
   public enum ReservationType {
     FULL,
     KICK
@@ -33,11 +39,11 @@ public class ReservationConfiguration extends PluginConfiguration {
 
   public ReservationConfiguration(final Plugin plugin) throws IOException {
     super(plugin);
+    this.setPlayers();
   }
 
-  @SuppressWarnings("unchecked")
   public Map<String, ReservationType> getPlayers() {
-    return (Map<String, ReservationType>) this.getConfiguration().getMapList("reserved-players");
+    return Collections.unmodifiableMap(this.reservedPlayers);
   }
 
   public int getReservedSlots() {
@@ -53,9 +59,30 @@ public class ReservationConfiguration extends PluginConfiguration {
     return this.getConfiguration().getBoolean("hide-reserved-slots", true);
   }
 
-  public void setPlayers(final Map<String, ReservationType> players) {
-    this.getConfiguration().createSection("reserved-players", players);
+  public void addPlayer(String name, ReservationType type) {
+    ConfigurationSection section = this.getConfiguration().getConfigurationSection("reserved-players");
+    section.set(name, type.name());
     this.save();
+    this.reservedPlayers.put(name, type);
+  }
+  
+  public void removePlayer(String name) {
+    ConfigurationSection section = this.getConfiguration().getConfigurationSection("reserved-players");
+    section.set(name, null);
+    this.save();
+    this.reservedPlayers.remove(name);
+  }
+  
+  private void setPlayers() {
+    ConfigurationSection section = this.getConfiguration().getConfigurationSection("reserved-players");
+    this.reservedPlayers.clear();
+    for (String key : section.getKeys(false)) {
+      try {
+        this.reservedPlayers.put(key, ReservationType.valueOf(section.getString(key)));
+      } catch (final IllegalArgumentException exception) {
+        this.getLogger().warning(this, "invalid-reservation", key);
+      }
+    }
   }
 
 }

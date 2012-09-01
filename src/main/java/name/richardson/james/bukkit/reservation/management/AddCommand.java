@@ -26,7 +26,9 @@ import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.command.ConsoleCommand;
 
+@ConsoleCommand
 public class AddCommand extends AbstractCommand {
 
   private String player;
@@ -47,11 +49,11 @@ public class AddCommand extends AbstractCommand {
 
   public void parseArguments(final String[] arguments, final CommandSender sender) throws CommandArgumentException {
     if (arguments.length != 2) {
-      throw new CommandArgumentException(this.getUsage(), null);
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-arguments"), null);
     }
     this.player = arguments[0];
     try {
-      this.reservation = ReservationType.valueOf(arguments[1]);
+      this.reservation = ReservationType.valueOf(arguments[1].toUpperCase());
     } catch (final IndexOutOfBoundsException exception) {
       throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-valid-reservation"), this.getLocalisation().getMessage(this, "valid-reservations"));
     } catch (final IllegalArgumentException exception) {

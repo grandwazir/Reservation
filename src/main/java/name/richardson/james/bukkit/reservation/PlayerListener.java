@@ -47,6 +47,7 @@ public class PlayerListener implements Listener {
     this.reservedPlayers = reservedPlayers;
     this.plugin = plugin;
     this.localisation = plugin.getLocalisation();
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -74,12 +75,13 @@ public class PlayerListener implements Listener {
       }
       break;
     }
-
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void onServerListPing(final ServerListPingEvent event) {
-    event.setMaxPlayers(event.getMaxPlayers() - this.plugin.getHiddenSlotCount());
+    final int slots = event.getMaxPlayers() - this.plugin.getHiddenSlotCount();
+    System.out.print(slots);
+    event.setMaxPlayers(slots);
   }
 
   private ServerState getServerState() {
