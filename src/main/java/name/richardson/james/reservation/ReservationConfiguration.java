@@ -2,42 +2,42 @@
 package name.richardson.james.reservation;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Map;
 
-import name.richardson.james.reservation.util.Configuration;
-import name.richardson.james.reservation.util.Logger;
+import name.richardson.james.bukkit.utilities.configuration.PluginConfiguration;
+import name.richardson.james.bukkit.utilities.plugin.Plugin;
 
-public class ReservationConfiguration extends Configuration {
-
-  protected final static Logger logger = new Logger(ReservationConfiguration.class);
-  protected final static String fileName = "config.yml";
-
-  protected final InputStream defaults = Reservation.getInstance().getResource(fileName);
-
-  public ReservationConfiguration() throws IOException {
-    super();
+public class ReservationConfiguration extends PluginConfiguration {
+  
+  public enum ReservationType {
+    KICK,
+    FULL
   }
-
-  public static ReservationConfiguration getInstance() {
-    return (ReservationConfiguration) instance;
+  
+  public ReservationConfiguration(Plugin plugin) throws IOException {
+    super(plugin);
   }
-
+  
   public int getReservedSlots() {
-    return configuration.getInt("reserved-slots");
+    return getConfiguration().getInt("reserved-slots", 0);
   }
 
   public boolean isDebugging() {
-    return configuration.getBoolean("debugging");
+    return getConfiguration().getBoolean("debugging");
   }
 
   public boolean isHideReservedSlots() {
-    return configuration.getBoolean("hide-reserved-slots");
+    return getConfiguration().getBoolean("hide-reserved-slots", true);
   }
-
-  public void logValues() {
-    logger.config(String.format("debugging: %b", isDebugging()));
-    logger.config(String.format("hide-reserved-slots: %b", isHideReservedSlots()));
-    logger.config(String.format("reserved-slots: %d", getReservedSlots()));
+  
+  @SuppressWarnings("unchecked")
+  public Map<String, ReservationType> getPlayers() {
+    return (Map<String, ReservationType>) getConfiguration().getMapList("reserved-players");
+  }
+  
+  public void setPlayers(Map<String, ReservationType> players) {
+    getConfiguration().createSection("reserved-players", players);
+    this.save();
   }
 
 }

@@ -1,5 +1,9 @@
-# Read more about these options at http://github.com/grandwazir/Reservation/wiki/instructions.
-
 debugging: false
-reserved-slots: 2
-hide-reserved-slots: true
+send-anonymous-statistics: true
+automatic-updates:
+  enabled: true
+  method: notify
+  branch: stable
+reserved-slots: 0
+hide-reserved-slots: false
+reserved-players: {}

@@ -1,7 +1,6 @@
-main: name.richardson.james.reservation.Reservation
-database: true
-version: 1.0.1
-name: Reservation
+main: name.richardson.james.bukkit.reservation.Reservation
+version: ${project.version}
+name: ${project.name}
 description: Manage player slots on your server.
 website: https://github.com/grandwazir/Reservation
 author: James Richardson (grandwazir)

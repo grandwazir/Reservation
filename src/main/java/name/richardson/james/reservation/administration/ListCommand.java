@@ -19,45 +19,42 @@
 
 package name.richardson.james.reservation.administration;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import name.richardson.james.bukkit.utilities.command.AbstractCommand;
+import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
+import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
+import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.database.ReservationRecord;
-import name.richardson.james.reservation.database.ReservationRecord.Type;
-import name.richardson.james.reservation.util.Command;
+import name.richardson.james.reservation.ReservationConfiguration.ReservationType;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.permissions.PermissionDefault;
 
-public class ListCommand extends Command {
+public class ListCommand extends AbstractCommand {
 
-  public ListCommand(final Reservation plugin) {
-    super(plugin);
-    this.name = "list";
-    this.description = "list all players that have reservations";
-    this.usage = "/reserve list";
-    this.permission = "reservation." + this.name;
-    this.registerPermission(this.permission, "list players on the reservation list", PermissionDefault.OP);
+  private final Map<String, ReservationType> reservedPlayers;
+  
+  private final ChoiceFormatter formatter;
+
+  public ListCommand(final Reservation plugin, Map<String, ReservationType> players) {
+    super(plugin, false);
+    this.reservedPlayers = players;
+    this.formatter = new ChoiceFormatter(this.getLocalisation());
+    this.formatter.setLimits(0, 1, 2);
+    this.formatter.setMessage(this, "header");
+    this.formatter.setArguments(reservedPlayers.size());
+    this.formatter.setFormats(
+        this.getLocalisation().getMessage(this, "no-players"), 
+        this.getLocalisation().getMessage(this, "one-player"), 
+        this.getLocalisation().getMessage(this, "many-players")
+    );
   }
 
-  @Override
-  public void execute(final CommandSender sender, final Map<String, Object> arguments) {
-    Map<String, Type> reservations = this.handler.listReservations();
-    if (reservations.size() == 0) {
-      sender.sendMessage(ChatColor.YELLOW + "There are no players on the list.");
-    } else {
-      final String list = this.buildList(reservations);
-      final String numberOfPlayers = Integer.toString(reservations.size());
-      sender.sendMessage(ChatColor.YELLOW + numberOfPlayers + " player(s): " + ChatColor.WHITE + list);
-    }
-  }
-
-  private String buildList(final Map<String, Type> reservations) {
+  private String buildList() {
     final StringBuilder list = new StringBuilder();
-    for (Entry<String, ReservationRecord.Type> entry : reservations.entrySet()) {
+    for (Entry<String, ReservationType> entry : reservedPlayers.entrySet()) {
       list.append(entry.getKey());
       list.append(" (");
       list.append(entry.getValue());
@@ -68,9 +65,20 @@ public class ListCommand extends Command {
     return list.toString();
   }
 
-  @Override
-  protected Map<String, Object> parseArguments(final List<String> arguments) throws IllegalArgumentException {
-    return null;
+
+  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+    if (reservedPlayers.isEmpty()) {
+      sender.sendMessage(this.getLocalisation().getMessage(this, "no-players"));
+    } else {
+      this.formatter.setArguments(reservedPlayers.size());
+      final String list = this.buildList();
+      sender.sendMessage(this.formatter.getMessage());
+      sender.sendMessage(list);
+    }
+  }
+
+  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    return;
   }
 
 }

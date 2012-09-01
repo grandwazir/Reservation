@@ -19,59 +19,45 @@
 
 package name.richardson.james.reservation.administration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.database.ReservationRecord;
-import name.richardson.james.reservation.database.ReservationRecord.Type;
-import name.richardson.james.reservation.util.Command;
-
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.permissions.PermissionDefault;
 
-public class AddCommand extends Command {
+import name.richardson.james.bukkit.utilities.command.AbstractCommand;
+import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
+import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
+import name.richardson.james.bukkit.utilities.command.CommandUsageException;
+import name.richardson.james.reservation.Reservation;
+import name.richardson.james.reservation.ReservationConfiguration.ReservationType;
+
+
+public class AddCommand extends AbstractCommand {
+
+  private ReservationType reservation;
+  
+  private String player;
+
+  private final Reservation plugin;
 
   public AddCommand(final Reservation plugin) {
-    super(plugin);
-    this.name = "add";
-    this.description = "add a player to the reservation list";
-    this.usage = "/reserve add [name] [type]";
-    this.permission = "reservation." + this.name;
-    this.registerPermission(this.permission, "add people to the reservation list", PermissionDefault.OP);
+    super(plugin, false);
+    this.plugin = plugin;
   }
 
-  @Override
-  public void execute(final CommandSender sender, final Map<String, Object> arguments) {
-    final OfflinePlayer player = (OfflinePlayer) arguments.get("player");
-    final Type reservationType = (Type) arguments.get("reservationType");
-
-    if (this.handler.addReservation(player, reservationType)) {
-      sender.sendMessage(String.format(ChatColor.GREEN + "%s added to reserved list.", player.getName()));
-      this.logger.info(String.format("%s added %s to reserved list.", sender.getName(), player.getName()));
-    } else {
-      sender.sendMessage(String.format(ChatColor.YELLOW + "%s is already on the reserved list.", player.getName()));
-    }
+  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+    this.plugin.addPlayer(player, reservation);
+    sender.sendMessage(this.getLocalisation().getMessage(this, "player-added", player));
   }
 
-  @Override
-  protected Map<String, Object> parseArguments(final List<String> arguments) throws IllegalArgumentException {
-    final Map<String, Object> m = new HashMap<String, Object>();
-    arguments.remove(0);
-
+  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    if (arguments.length != 2) throw new CommandArgumentException(this.getUsage(), null);
+    this.player = arguments[0];
     try {
-      m.put("player", this.plugin.getServer().getOfflinePlayer(arguments.get(0)));
-      m.put("reservationType", ReservationRecord.Type.valueOf(arguments.get(1)));
+      this.reservation = ReservationType.valueOf(arguments[1]);
     } catch (final IndexOutOfBoundsException exception) {
-      throw new IllegalArgumentException("You must specify both a name and a reservation type.");
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-valid-reservation"), this.getLocalisation().getMessage(this, "valid-reservations"));
     } catch (final IllegalArgumentException exception) {
-      throw new IllegalArgumentException("Use FULL or KICK as the type.");
-    }
-
-    return m;
+      throw new CommandArgumentException(this.getLocalisation().getMessage(this, "must-specify-valid-reservation"), this.getLocalisation().getMessage(this, "valid-reservations"));
+    } 
   }
 
+  
 }

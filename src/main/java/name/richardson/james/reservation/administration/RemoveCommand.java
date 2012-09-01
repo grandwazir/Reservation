@@ -19,53 +19,34 @@
 
 package name.richardson.james.reservation.administration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import name.richardson.james.bukkit.utilities.command.AbstractCommand;
+import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
+import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
+import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.util.Command;
 
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.permissions.PermissionDefault;
 
-public class RemoveCommand extends Command {
+public class RemoveCommand extends AbstractCommand {
+
+  private String player;
+  
+  private final  Reservation plugin;
 
   public RemoveCommand(final Reservation plugin) {
-    super(plugin);
-    this.name = "remove";
-    this.description = "remove a player from the reservation list";
-    this.usage = "/reserve remove [playerName]";
-    this.permission = "reservation." + this.name;
-    this.registerPermission(this.permission, "remove people to the reservation list", PermissionDefault.OP);
+    super(plugin, false);
+    this.plugin = plugin;
   }
 
-  @Override
-  public void execute(final CommandSender sender, final Map<String, Object> arguments) {
-    final OfflinePlayer player = (OfflinePlayer) arguments.get("player");
-
-    if (this.handler.removeReservation(player)) {
-      sender.sendMessage(String.format(ChatColor.GREEN + "%s has been removed from the reserved list.", player.getName()));
-      this.logger.info(String.format("%s removed %s from the reserved list.", sender.getName(), player.getName()));
-    } else {
-      sender.sendMessage(String.format(ChatColor.YELLOW + "%s is not on the reserved list.", player.getName()));
-    }
+  public void execute(CommandSender sender) throws CommandArgumentException, CommandPermissionException, CommandUsageException {
+    this.plugin.removePlayer(player);
+    sender.sendMessage(this.getLocalisation().getMessage(this, "player-removed", player));
   }
 
-  @Override
-  protected Map<String, Object> parseArguments(final List<String> arguments) throws IllegalArgumentException {
-    final Map<String, Object> m = new HashMap<String, Object>();
-    arguments.remove(0);
-
-    try {
-      m.put("player", this.plugin.getServer().getOfflinePlayer(arguments.get(0)));
-    } catch (final IndexOutOfBoundsException exception) {
-      throw new IllegalArgumentException("You must specify a player name.");
-    }
-
-    return m;
+  public void parseArguments(String[] arguments, CommandSender sender) throws CommandArgumentException {
+    if (arguments.length != 1) throw new CommandArgumentException(this.getUsage(), null);
+    this.player = arguments[0];
   }
+
 
 }
