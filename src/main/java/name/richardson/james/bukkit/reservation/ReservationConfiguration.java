@@ -1,5 +1,5 @@
 
-package name.richardson.james.reservation;
+package name.richardson.james.bukkit.reservation;
 
 import java.io.IOException;
 import java.util.Map;

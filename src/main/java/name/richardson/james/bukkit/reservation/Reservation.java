@@ -17,17 +17,17 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.reservation;
+package name.richardson.james.bukkit.reservation;
 
 import java.io.IOException;
 import java.util.Map;
 
+import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
+import name.richardson.james.bukkit.reservation.administration.AddCommand;
+import name.richardson.james.bukkit.reservation.administration.ListCommand;
+import name.richardson.james.bukkit.reservation.administration.RemoveCommand;
 import name.richardson.james.bukkit.utilities.command.CommandManager;
 import name.richardson.james.bukkit.utilities.plugin.AbstractPlugin;
-import name.richardson.james.reservation.ReservationConfiguration.ReservationType;
-import name.richardson.james.reservation.administration.AddCommand;
-import name.richardson.james.reservation.administration.ListCommand;
-import name.richardson.james.reservation.administration.RemoveCommand;
 
 public class Reservation extends AbstractPlugin {
   

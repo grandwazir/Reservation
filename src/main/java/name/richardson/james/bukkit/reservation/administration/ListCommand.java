@@ -17,18 +17,18 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.reservation.administration;
+package name.richardson.james.bukkit.reservation.administration;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
+import name.richardson.james.bukkit.reservation.Reservation;
+import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
 import name.richardson.james.bukkit.utilities.command.AbstractCommand;
 import name.richardson.james.bukkit.utilities.command.CommandArgumentException;
 import name.richardson.james.bukkit.utilities.command.CommandPermissionException;
 import name.richardson.james.bukkit.utilities.command.CommandUsageException;
 import name.richardson.james.bukkit.utilities.formatters.ChoiceFormatter;
-import name.richardson.james.reservation.Reservation;
-import name.richardson.james.reservation.ReservationConfiguration.ReservationType;
 
 import org.bukkit.command.CommandSender;
 

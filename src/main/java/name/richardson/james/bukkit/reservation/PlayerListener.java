@@ -17,13 +17,13 @@
  * Reservation. If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package name.richardson.james.reservation;
+package name.richardson.james.bukkit.reservation;
 
 import java.util.Map;
 
+import name.richardson.james.bukkit.reservation.ReservationConfiguration.ReservationType;
 import name.richardson.james.bukkit.utilities.listener.Listener;
 import name.richardson.james.bukkit.utilities.localisation.Localisation;
-import name.richardson.james.reservation.ReservationConfiguration.ReservationType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
